@@ -1,0 +1,1 @@
+/usr/bin/c++  -fvisibility=hidden CMakeFiles/abcechobounds.dir/AbcBoundsEcho.cpp.o -o abcechobounds  -Wl,-rpath,:::::::::::::: ../../lib/Alembic/libAlembic.a /usr/lib/x86_64-linux-gnu/libImath.so /usr/lib/x86_64-linux-gnu/libIlmThread.so /usr/lib/x86_64-linux-gnu/libIex.so /usr/lib/x86_64-linux-gnu/libHalf.so -lpthread -lm

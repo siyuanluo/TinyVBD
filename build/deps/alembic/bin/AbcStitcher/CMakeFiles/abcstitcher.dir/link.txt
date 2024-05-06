@@ -1,0 +1,1 @@
+/usr/bin/c++  -fvisibility=hidden CMakeFiles/abcstitcher.dir/AbcStitcher.cpp.o CMakeFiles/abcstitcher.dir/util.cpp.o -o abcstitcher  -Wl,-rpath,:::::::::::::: ../../lib/Alembic/libAlembic.a /usr/lib/x86_64-linux-gnu/libImath.so /usr/lib/x86_64-linux-gnu/libIlmThread.so /usr/lib/x86_64-linux-gnu/libIex.so /usr/lib/x86_64-linux-gnu/libHalf.so -lpthread -lm

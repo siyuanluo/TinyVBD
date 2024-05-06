@@ -120,7 +120,7 @@ struct StrandSim
 		std::vector<float> ls;
 		float m0 = 1;
 		float m1 = 1000;
-		params.outPath = "C:\\Data\\Test4_20Verts_30degree_withSkip_stiffness1e8";
+		params.outPath = "/home/workstation/Documents/Siyuan/TinyVBD/output/Test4_20Verts_30degree_withSkip_stiffness1e8";
 
 		std::vector<float> ms;
 
@@ -159,7 +159,7 @@ struct StrandSim
 		bool addSkipSpring = true;
 		float skipSpringStrength = 100;
 		float tanAngle = 0.57735f; // 30 deg
-		params.outPath = "C:\\Data\\Test4_20Verts_30degree_withSkip_stiffness1e8";
+		params.outPath = "/home/workstation/Documents/Siyuan/TinyVBD/output/Test4_20Verts_30degree_withSkip_stiffness1e8";
 
 		std::vector<float> ms;
 
@@ -238,7 +238,7 @@ struct StrandSim
 		int numVerts = 5;
 		params.numIterations = 100;
 		params.accelerationRho = 0.0;
-		params.outPath = "C:\\Data\\Test8_5Verts_stiffnessRatio48_accelerated";
+		params.outPath = "/home/workstation/Documents/Siyuan/TinyVBD/output/Test8_5Verts_stiffnessRatio48_accelerated";
 
 		//int numVerts = 5;
 		//params.numIterations = 20000;
@@ -295,8 +295,8 @@ struct StrandSim
 	}
 
 	void initialize() {
-		initializeTilted();
-		//initializeStiffRatio();
+		//initializeTilted();
+		initializeStiffRatio();
 
 		outPath = params.outPath;
 		createFolder(outPath);
@@ -434,6 +434,13 @@ struct StrandSim
 			//std::cout << "Vertex position at frame:" << frameId << "\n" << strand.mVertPos.transpose() << "\n";
 			std::cout << "Frame: " << frameId << " finished!\n";
 			saveOutputs();
+		}
+
+		for(int i = 0; i < strand.edges.size(); i++)
+		{
+			std::cout << "Edge:" << i << "<<<<<" << std::endl;
+			std::cout << strand.edges[i].x() << std::endl;
+			std::cout << strand.edges[i].y() << std::endl;
 		}
 	}
 
