@@ -9,11 +9,14 @@ set (CMAKE_CXX_STANDARD 14)
 find_package(Eigen3 REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIR})
 
+# Add IMath
+add_subdirectory("deps/Imath")
+
 # Add Alembic and set for Options
 set(ALEMBIC_BUILD_TESTS OFF CACHE BOOL "Disable Alembic's tests")
 set(ALEMBIC_LIB_USES_TESTS OFF CACHE BOOL "Disable Alembic's tests")
 set(ALEMBIC_SHARED_LIBS OFF)  # Build primary Alembic library as static
-set(USE_HDF5 OFF)              # Enable HDF5 support
+set(USE_HDF5 ON)              # Enable HDF5 support
 set(USE_MAYA OFF)              # Enable MAYA
 set(USE_PYALEMBIC OFF)         # Build the boost python bindings for Alembic
 add_subdirectory("deps/alembic")

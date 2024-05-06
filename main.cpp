@@ -2,12 +2,30 @@
 #include "json.hpp"
 #include <fstream>
 
+#include <Alembic/AbcCoreHDF5/All.h>
+#include <Alembic/AbcGeom/All.h>
+
 #ifdef _WIN32
 #include <windows.h>
 #include <io.h>
 #include <direct.h>
 #include <fileapi.h>
 #endif
+
+using namespace Alembic::AbcGeom;
+
+
+
+void initializeAlembic(std::string outFile, OArchive& archive, OPolyMesh& mesh)
+{
+	double timePerCycle = 1.0 / 30.0; // Adapt this to your actual timing needs
+	double startTime = 0.0;
+
+	Alembic::Abc::TimeSampling ts(timePerCycle, startTime);
+	archive = OArchive(Alembic::AbcCoreHDF5::WriteArchive(), outFile);
+	uint32_t tsIndex = archive.addTimeSampling(ts);    
+    mesh = OPolyMesh(archive.getTop(), "mesh", tsIndex);
+}
 
 inline bool saveJson(std::string  filePath, nlohmann::json& j, int indent = -1) {
 	std::ofstream ofs(filePath);
@@ -444,6 +462,50 @@ struct StrandSim
 		}
 	}
 
+	void simulate_abc(OArchive& archive, OPolyMesh& mesh) {
+		std::string outFile = outPath + "/sim.abc";
+
+		initializeAlembic(outFile, archive, mesh);
+
+		saveOutAbc(archive, mesh);
+
+		// Simulation Loop
+		params.dt = params.dt / params.substeps;
+
+		for (frameId = 1; frameId < params.numFrames; frameId++)
+		{
+			for (step = 0; step < params.substeps; step++)
+			{
+				forwardStep();
+				float omega=1.f;
+				for (iter = 0; iter < params.numIterations; iter++)
+				{
+					TVerticesMat posBeforeIter = strand.mVertPos;
+					solve();
+
+					omega = getAcceleratorOmega(iter+1, params.accelerationRho, omega);
+					if (iter % 10 == 0)
+					{
+						//std::cout << "acceleration ratio: " << omega << "\n";
+					}
+
+					if (params.useAcceleration)
+					{
+						applyAccelerator(omega, posBeforeIter);
+					}
+				}
+
+				updateVelocity();
+
+			}
+
+			//std::cout << "Vertex position at frame:" << frameId << "\n" << strand.mVertPos.transpose() << "\n";
+			std::cout << "Frame: " << frameId << " finished!\n";
+			saveOutAbc(archive, mesh);
+		}
+		archive.reset();
+	}
+
 	void saveOutputs() {
 		std::vector<std::array<FloatingType, 3>> verts;
 
@@ -465,6 +527,35 @@ struct StrandSim
 		saveJson(outFile, j, 2);
 	}
 
+	void saveOutAbc(OArchive& archive, OPolyMesh& mesh) {
+		std::vector<V3f> verts(strand.numVerts);
+		std::vector<Alembic::Abc::int32_t> faceIndices;
+		faceIndices.reserve(strand.edges.size() * 2); 
+		std::vector<Alembic::Abc::int32_t> faceCounts = {2, 2, 2, 2};
+
+		for (int iV = 0; iV < strand.numVerts; ++iV)
+		{
+			V3f v = V3f(strand.mVertPos.col(iV)[0], 
+						strand.mVertPos.col(iV)[1], 
+						strand.mVertPos.col(iV)[2] );
+
+			verts[iV] = v;
+		}
+
+		for (int i = 0; i < strand.edges.size(); i++) {
+			faceIndices.push_back(strand.edges[i].x()); 
+			faceIndices.push_back(strand.edges[i].y());
+		}
+
+		OPolyMeshSchema &schema = mesh.getSchema();
+		OPolyMeshSchema::Sample meshSample;
+
+		meshSample.setPositions(V3fArraySample(&verts.front(), verts.size()));
+		meshSample.setFaceCounts(Int32ArraySample(&faceCounts.front(), faceCounts.size()));
+		meshSample.setFaceIndices(Int32ArraySample(&faceIndices.front(), faceIndices.size()));
+		schema.set(meshSample);
+	}
+
 	VBDStrand strand;
 	SimulatorParams params;
 	std::string outPath;
@@ -476,9 +567,14 @@ struct StrandSim
 
 
 int main(int argc, char** argv) {
+	string outputpath = "/home/workstation/Documents/Siyuan/TinyVBD/out.abc";
+	OArchive archive;
+	OPolyMesh mesh;
+	OPoints points;
 	// simulateClothMeshStVK();
 	StrandSim simulator;
 	simulator.initialize();
 
-	simulator.simulate();
+	//simulator.simulate();
+	simulator.simulate_abc(archive, mesh);
 }

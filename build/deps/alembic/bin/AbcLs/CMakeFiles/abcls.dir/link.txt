@@ -1,1 +1,0 @@
-/usr/bin/c++  -fvisibility=hidden CMakeFiles/abcls.dir/AbcLs.cpp.o -o abcls  -Wl,-rpath,:::::::::::::: ../../lib/Alembic/libAlembic.a /usr/lib/x86_64-linux-gnu/libImath.so /usr/lib/x86_64-linux-gnu/libIlmThread.so /usr/lib/x86_64-linux-gnu/libIex.so /usr/lib/x86_64-linux-gnu/libHalf.so -lpthread -lm
